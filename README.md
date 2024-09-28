@@ -9,13 +9,6 @@ Wikipedia has a great [article](https://en.wikipedia.org/wiki/Wave_function_coll
 
 ## Concepts
 
-## Objects
-
-Renderer - renders the generated "wave" function to the canvas
-Wave<T, C> - handles the wave function and tiles
-Tile<T, C> - handles rotation and constraint checks, also handles propagation
-Cell<T, C> - contains the entropy and the state of the cell (collapsed/observed)
-
 ## Terminologies
 
 - Unobserved - each cell has an initial unobserved state (in quantum mechanics, it means that the cell is in a superposition of all possible states)
@@ -25,12 +18,28 @@ Cell<T, C> - contains the entropy and the state of the cell (collapsed/observed)
 
 ## Implementation
 
+### Simple Tile Model
+
+Main algorithm classes?
+
+Renderer - renders the generated "wave" function to the canvas
+Wave<T, C> - handles the wave function and tiles
+Tile<T, C> - handles rotation and constraint checks, also handles propagation
+Cell<T, C> - contains the entropy and the state of the cell (collapsed/observed)
+
+- Create tile images
+- Set the possibleStates for the tiles (Tile)
+
 ## TODO for Simple Tile Model
 
 - [x] Show images at random
-  - [ ] Create tile images. 48x48 pixels
+  - [x] Create tile images. 48x48 pixels
   - [ ] Create canvas of specific size (for now must be multiple of 48)
   - [ ] Add images to canvas of specified size
+  - [ ] requestAnimationFrame implementation on canvas
+  - [ ] Fill-up the entire canvas with randomization without using the algorithm
+  - [ ] Do above but with wave implementation with drawImage callbacks
+  - []
 - [ ] Initialize image as the combination of all colors in the images (to represent the output in a completely observed state)
 
 ## References:

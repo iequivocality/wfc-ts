@@ -1,61 +1,115 @@
 import { useEffect, useRef } from "react";
+import { Tile, TileMetadata, Wave } from "./wfc";
+import { useCanvas } from "./Canvas";
 
-const TILES = [
+interface ImageTileMetadata extends TileMetadata {
+  imageUrl: string;
+}
+
+const TILE_IMAGES: ImageTileMetadata[] = [
   {
+    id: "BLANK",
+    constraints: [],
+    default: true,
     imageUrl: "/tiles/blank.jpg"
   },
   {
+    id: "CROSS",
+    constraints: [
+      { direction: "up", possibleIds: ["CROSS", "T_DOWN", "T_LEFT", "T_RIGHT", "VERT"] },
+      { direction: "down", possibleIds: ["CROSS", "T_LEFT", "T_RIGHT", "T_UP", "VERT"] },
+      { direction: "left", possibleIds: ["CROSS", "HORIZ", "T_DOWN", "T_RIGHT", "T_UP"] },
+      { direction: "right", possibleIds: ["CROSS", "HORIZ", "T_DOWN", "T_LEFT", "T_UP"] }
+    ],
     imageUrl: "/tiles/cross.jpg"
   },
   {
+    id: "HORIZ",
+    constraints: [],
     imageUrl: "/tiles/horizontal.jpg"
   },
   {
+    id: "T_DOWN",
+    constraints: [],
     imageUrl: "/tiles/t_down.jpg"
   },
   {
+    id: "T_LEFT",
+    constraints: [],
     imageUrl: "/tiles/t_left.jpg"
   },
   {
+    id: "T_RIGHT",
+    constraints: [],
     imageUrl: "/tiles/t_right.jpg"
   },
   {
+    id: "T_UP",
+    constraints: [],
     imageUrl: "/tiles/t_up.jpg"
   },
   {
+    id: "VERT",
+    constraints: [],
     imageUrl: "/tiles/vertical.jpg"
   }
 ];
 
 function App() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const width = 10;
+  const height = 10;
+  const tileSize = 48;
+
+  const wave = useRef(new Wave({
+    width,
+    height,
+    tileSize,
+    tileMetadata: TILE_IMAGES
+  }));
+
+  const draw = (ctx: CanvasRenderingContext2D, frameCount: number) => {
+    if (frameCount % 60 !== 0) {
+      return;
+    }
+
+    const grid = wave.current.update();
+
+    for (let i = 0; i < width; i++) {
+      for (let j = 0; j < height; j++) {
+        const tile: Tile<ImageTileMetadata[]> = grid[i + j];
+        const metadata : ImageTileMetadata = tile.observe();
+        const tileImage = new Image(tileSize, tileSize);
+        tileImage.src = metadata.imageUrl;
+        tileImage.addEventListener("load", () => {
+          ctx.drawImage(tileImage, j * tileSize, i * tileSize, tileSize, tileSize);
+        });
+        
+      }
+    }
+  }
+
+  const canvasRef = useCanvas(draw);
   useEffect(() => {
-    console.log("App", canvasRef.current)
     if (canvasRef.current) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
       if (ctx) {
-        ctx.fillStyle = "red";
+        ctx.fillStyle = "#31446E";
         ctx.fillRect(0, 0, 480, 480);
 
-        let startX = 0;
-        let startY = 0;
+        const grid = wave.current.update();
 
-        for (let i = 0; i < TILES.length; i++) {
-          const tile = TILES[i];
-          const tileImage = new Image();
-          tileImage.width = 48;
-          tileImage.height = 48;
-          tileImage.src = tile.imageUrl;
-          tileImage.addEventListener("load", () => {
-            ctx.drawImage(tileImage, startX, startY, 48, 48);
-            if (startX + 48 >= 480) {
-              startX = 0;
-              startY += 48;
-            } else {
-              startX += 48;
-            }
-          });
+        for (let i = 0; i < width; i++) {
+          for (let j = 0; j < height; j++) {
+            const tile: Tile<ImageTileMetadata[]> = grid[i + j];
+            const metadata : ImageTileMetadata = tile.observe();
+            const tileImage = new Image(tileSize, tileSize);
+            tileImage.src = metadata.imageUrl;
+            tileImage.addEventListener("load", () => {
+              ctx.drawImage(tileImage, j * tileSize, i * tileSize, tileSize, tileSize);
+            });
+            
+          }
         }
       }
     }
